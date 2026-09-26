@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>曲面 z = (y - x²)(y - 2x²)</title>
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    #plot { width: 90vw; height: 90vh; }
+  </style>
+</head>
+<body>
+
+<div id="plot"></div>
+
+<script>
+  const size = 140;
+  const x = [], y = [], z = [];
+  const xRange = 1.3;
+  const yMin = -0.3, yMax = 1.8;
+
+  for (let i = 0; i < size; i++) {
+    x[i] = -xRange + (2 * xRange * i) / (size - 1);
+    y[i] = yMin + ((yMax - yMin) * i) / (size - 1);
+  }
+
+  for (let i = 0; i < size; i++) {
+    z[i] = [];
+    for (let j = 0; j < size; j++) {
+      const xi = x[j];
+      const yj = y[i];
+      z[i][j] = (yj - Math.pow(xi, 2)) * (yj - 2 * Math.pow(xi, 2));
+    }
+  }
+
+  // 1. 曲面本体
+ const surfaceData = {
+    z: z, x: x, y: y,
+    type: 'surface',
+    opacity: 0.8, // ← これを追加
+    colorscale: 'Viridis',
+    // ...
+  };
+
+  // 2. 曲線 y = x^2 (z = 0 となる線・赤)
+  const c1X = [], c1Y = [], c1Z = [];
+  for (let t = -1.25; t <= 1.25; t += 0.03) {
+    c1X.push(t);
+    c1Y.push(t * t);
+    c1Z.push(0.04); // z=0 の境界線
+  }
+  const curveYeqX2 = {
+    x: c1X, y: c1Y, z: c1Z,
+    type: 'scatter3d', mode: 'lines',
+    name: 'y = x²',
+    line: { color: 'red', width: 6 }
+  };
+
+  // 3. 曲線 y = 2x^2 (z = 0 となる線・青)
+  const c2X = [], c2Y = [], c2Z = [];
+  for (let t = -0.92; t <= 0.92; t += 0.03) {
+    c2X.push(t);
+    c2Y.push(2 * t * t);
+    c2Z.push(0.04); // z=0 の境界線
+  }
+  const curveYeq2X2 = {
+    x: c2X, y: c2Y, z: c2Z,
+    type: 'scatter3d', mode: 'lines',
+    name: 'y = 2x²',
+    line: { color: 'dodgerblue', width: 6 }
+  };
+
+  // 4. 原点 (0,0,0) マーカー
+  const originPointData = {
+    x: [0], y: [0], z: [0.08],
+    mode: 'markers', type: 'scatter3d',
+    name: '原点 (鞍点)',
+    marker: { size: 2, color: '#39FF14', symbol: 'circle' };
+
+
+  const layout = {
+    title: { text: '$\\text{曲面 } z = (y - x^2)(y - 2x^2)$' },
+    autosize: true,
+    showlegend: true,
+    legend: { x: 0, y: 1 },
+    scene: {
+      xaxis: { title: { text: 'x' } },
+      yaxis: { title: { text: 'y' } },
+      zaxis: { title: { text: 'z' } },
+      // 原点(0,0,0)を中央に固定し、ズーム時に潜り込まないように設定
+camera: {
+        center: { x: 0, y: 0, z: 0 },   // 完全な原点中心にする
+        eye: { x: 1.3, y: -1.3, z: 1.0 } // 少し高めの視線にする
+      }
+    }
+  };
+
+  Plotly.newPlot('plot', [surfaceData, curveYeqX2, curveYeq2X2, originPointData], layout);
+</script>
+
+</body>
+</html>
